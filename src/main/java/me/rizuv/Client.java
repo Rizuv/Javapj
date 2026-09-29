@@ -1,12 +1,11 @@
 package me.rizuv;
 
 import java.util.Random;
-import me.rizuv.*;
 
 public class Client {
 
-    private ConfigManager cfg = new ConfigManager("config.json");
-    private int UUID_length = Integer.parseInt(cfg.read_data("UUID-length").toString());
+    private final ConfigManager cfg = new ConfigManager("config.json");
+    private final int UUID_length = Integer.parseInt(cfg.get_data(("UUID-length")));
 
     public Client(){
         this.create_uniqueid(UUID_length);
@@ -17,7 +16,7 @@ public class Client {
     }
 
     private String create_uniqueid(int length){
-        char[] characters = cfg.read_data("UUID-chars").toString().toCharArray();
+        char[] characters = cfg.get_data("UUID-chars").toCharArray();
         StringBuilder sb = new StringBuilder();
         Random r = new Random();
         for (int i = 0; i < length; i++){
