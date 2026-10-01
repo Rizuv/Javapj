@@ -1,24 +1,16 @@
 package me.rizuv;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.Writer;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public class JSONManager {
 
     private File f;
-    private JsonNode js;
+    private volatile JsonNode js;
     private final ObjectMapper mapper = new ObjectMapper();
     private final byte TYPE_STRING = 0x01;
     private final byte TYPE_ARRAY = 0x02;
@@ -32,7 +24,7 @@ public class JSONManager {
         }
     }
 
-    public byte[] read_data_bytes(String key){
+    public synchronized byte[] read_data_bytes(String key){
         JsonNode node = js.get(key);
         if (node.isNull()) return new byte[0];
 
@@ -57,7 +49,7 @@ public class JSONManager {
         return usable_data;
     }
 
-    public String read_data(String key){
+    public synchronized String read_data(String key){
         JsonNode node = js.get(key);
         String text;
 
@@ -71,44 +63,41 @@ public class JSONManager {
         return text;
     }
 
-    public void write_data_bytes(byte[] data_stream){
-        try{
-        JsonNode json_data = mapper.readTree(data_stream);
-        Iterator<String> fieldsIteratorInInputData = json_data.fieldNames();
-        List<String> fields = new ArrayList<>();
-        getAllKeysFromTree(js, fields);
-
-        Map<String, Object> json = mapper.readValue(f, new TypeReference<Map<String, Object>>(){});
-        Writer writer = new FileWriter(f, false);
-
-        while(fieldsIteratorInInputData.hasNext()){
-            String key = fieldsIteratorInInputData.next();
-            if(fields.contains(key)){
-                json.replace(key, json_data.get(key));
-            }
-        }
-        String jsonString = mapper.writeValueAsString(json);
-        System.out.println(jsonString);
-        writer.write(jsonString);
-        writer.close();
-        } catch (IOException e){
-            e.printStackTrace();
-        }
+    public synchronized void update(byte[] data) throws IOException {
+        JsonNode changes = mapper.readTree(data);
+        JsonNode root = mapper.readTree(f);      
+        merge(root, changes);                    
+        mapper.writerWithDefaultPrettyPrinter().writeValue(f, root); 
+        this.js = root;                          
     }
 
-    private void getAllKeysFromTree(JsonNode node, List<String> keys){
-        if(node.isObject()){
-            Iterator<Entry<String, JsonNode>> fields = node.fields();
-            fields.forEachRemaining(field -> {
-                keys.add(field.getKey());
-                getAllKeysFromTree((JsonNode) field.getValue(), keys);
-            });
-        } else if(node.isArray()){
-            ArrayNode array = (ArrayNode) node;
-            array.forEach(field -> {
-                getAllKeysFromTree(field, keys);
-            });
+    public synchronized void update(String jsoncontent) throws IOException{
+        JsonNode changes = mapper.readTree(jsoncontent);
+        JsonNode root = mapper.readTree(f);      
+        merge(root, changes);                    
+        mapper.writerWithDefaultPrettyPrinter().writeValue(f, root); 
+        this.js = root;
+    }
+
+    //Szukanie odpowiedniego pola idac od poczatku drzewa jsona glebiej po wezlach
+    private static void merge(JsonNode target, JsonNode changes) {
+        if (!target.isObject() || !changes.isObject()) return;
+        ObjectNode obj = (ObjectNode) target;
+
+    changes.fields().forEachRemaining(e -> {
+        JsonNode oldVal = obj.get(e.getKey());
+        if (oldVal == null) return;                       
+        if (oldVal.isObject() && e.getValue().isObject()) {
+            merge(oldVal, e.getValue());                  
+        } else {
+            obj.set(e.getKey(), e.getValue());            
         }
-        System.out.println(keys.toString());
+    });
+    }
+
+    public synchronized void changeValue(String key, String value) throws IOException{
+        String json = "{\"" + key + "\":\"" + value + "\"}";
+        update(json);
     }
 }
+

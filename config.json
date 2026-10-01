@@ -1,1 +1,4 @@
-{"UUID-length":10,"UUID-chars":["2","3"]}
+{
+  "UUID-length" : "15",
+  "UUID-chars" : [ "1", "2" ]
+}
