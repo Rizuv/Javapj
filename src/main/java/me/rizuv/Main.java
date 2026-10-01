@@ -6,6 +6,8 @@ public class Main {
     public static void main(String[] args) throws IOException {
         System.out.println("Hello world!");
         JSONManager cfg = new JSONManager("config.json");
-        System.out.println(cfg.read_data(("UUID-chars")));
+        //System.out.println(cfg.read_data(("UUID-chars")));
+        byte[] data = "{\"UUID_length\":\"dziala\", \"UUID-chars\":[\"2\", \"3\"]}".getBytes();
+        cfg.write_data_bytes(data);
     }
 }
