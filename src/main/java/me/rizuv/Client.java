@@ -20,7 +20,7 @@ public class Client {
         StringBuilder sb = new StringBuilder();
         Random r = new Random();
         for (int i = 0; i < length; i++){
-            int index = r.nextInt(14);
+            int index = r.nextInt(UUID_length);
             sb.append(characters[index]);
         }
         return sb.toString();

@@ -7,9 +7,7 @@ public class Main {
         System.out.println("Hello world!");
         JSONManager cfg = new JSONManager("config.json");
         //System.out.println(cfg.read_data(("UUID-chars")));
-        byte[] data = "{\"UUID-length\":\"dala\", \"UUID-chars\":[\"1\", \"2\"]}".getBytes();
+        byte[] data = "{\"UUID-length\":\"15\", \"UUID-chars\":[\"1\", \"2\"]}".getBytes();
         cfg.update(data);
-        cfg.changeValue("UUID-length", "15");
-        //System.out.println(cfg.read_data("UUID-chars"));
     }
 }
