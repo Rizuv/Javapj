@@ -10,7 +10,7 @@ Java, Maven, MariaDB, Jackson
 
 ---
 **Uruchomienie:**
-Wymaga konfiguracji pliku config.json
+Wymaga konfiguracji pliku config.json\
 Patrz config_example.json
 
 ---
@@ -20,7 +20,7 @@ Patrz config_example.json
 -szukanie danych w drzewie JSON
 
 ---
-**Klasa Client:**
+**Klasa Client:**\
 -generowanie unikalnego id przypisywanego danemu uzytkownikowi
 
 ---
